@@ -6,8 +6,10 @@ import com.shopverse.inventorymaster.model.dto.response.ProductResponse;
 import com.shopverse.inventorymaster.model.entity.Product;
 import com.shopverse.inventorymaster.repository.ProductRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -60,5 +62,9 @@ public class ProductService {
                         .quantity(productRequest.quantity())
                         .build()
         );
+    }
+
+    public List<Product> getFilteredProducts(BigDecimal minPrice, BigDecimal maxPrice, Sort sort) {
+        return productRepository.findAllByPriceBetween(minPrice, maxPrice, sort);
     }
 }
