@@ -13,9 +13,11 @@ import com.shopverse.inventorymaster.service.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -25,11 +27,6 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-
-    @GetMapping
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
-    }
 
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable @Positive(message = "ID must be a positive number") Long id) {
@@ -50,5 +47,24 @@ public class ProductController {
     public void updateProduct(@PathVariable @Positive(message = "ID must be a positive number") Long id,
                               @Valid @RequestBody CreateUpdateProductRequest productRequest) {
         productService.updateProduct(id, productRequest);
+    }
+
+    @GetMapping
+    public List<Product> getProductsWithFilter(
+            @RequestParam(required = false) @Positive(message = "minPrice must be positive") BigDecimal minPrice,
+            @RequestParam(required = false) @Positive(message = "maxPrice must be positive") BigDecimal maxPrice,
+            @RequestParam(defaultValue = "price,asc") String sort) {
+
+        if (minPrice != null && maxPrice != null) {
+
+
+            String[] sortParams = sort.split(",");
+
+            Sort.Direction direction = Sort.Direction.fromString(sortParams[1]);
+
+            return productService.getFilteredProducts(minPrice, maxPrice, Sort.by(direction, sortParams[0]));
+        }
+
+        return productService.getAllProducts();
     }
 }
